@@ -18,17 +18,28 @@ Zagon iz glavne mape projekta (prenese podatke):  python -m utils.orodja
 
 from __future__ import annotations
 
+import os
 import shutil
+import subprocess
+import sys
 import warnings
 from pathlib import Path
 
+import re
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.colors import to_rgb
 from plotnine import (aes, after_stat, coord_equal, coord_flip, element_blank, element_text,
-                      geom_boxplot, geom_col, geom_density, geom_histogram, geom_text, geom_tile,
-                      ggplot, labs, scale_fill_gradient2, scale_x_discrete, scale_x_log10,
-                      scale_y_discrete, scale_y_log10, theme, theme_minimal, theme_set)
+                      geom_boxplot, geom_col, geom_density, geom_histogram, geom_line, geom_point, geom_text,
+                      geom_tile, ggplot, facet_wrap, labs, scale_color_manual, scale_fill_gradient2,
+                      scale_fill_manual, scale_x_discrete, scale_x_log10, scale_y_discrete, scale_y_log10, theme,
+                      theme_minimal, theme_set, theme_void)
 from plotnine.exceptions import PlotnineWarning
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 
 KOREN = Path(__file__).resolve().parents[1]
 DATA = KOREN / "data"
@@ -301,6 +312,218 @@ def meje_iqr(s, k=1.5):
     q1, q3 = s.quantile([0.25, 0.75])
     iqr = q3 - q1
     return q1 - k * iqr, q3 + k * iqr
+
+# ===========================================================================
+# MODUL 2: zagon skript, izris dreves, lestvica "100 klicev", graf regresijskih modelov
+# ===========================================================================
+
+SEME = 42                      # isto seme povsod: vsi dobimo iste številke
+IMENA_RAZREDOV = ["ostane", "odide"]
+
+# 16 številskih značilk telekoma iz prvega modula (brez id_stranke in brez cilja odhod)
+TELEKOM_STEVILSKE = [
+    "mesecev_narocnine", "povp_mesecni_prihodek", "povp_mesecna_narocnina", "povp_minute",
+    "povp_minute_6m", "sprememba_minut", "povp_minute_prekoracitev", "povp_gostovanje",
+    "povp_klici_podpora", "povp_prekinjeni_klici", "stevilo_narocnin", "stevilo_telefonov",
+    "dni_z_napravo", "cena_naprave", "dohodek_razred", "stevilo_avtomobilov",
+]
+
+
+# ---------------------------------------------------------------------------
+# Zagon skripte za pripravo podatkov: utils/pripravi_telekom.py, utils/pripravi_olist.py
+# ---------------------------------------------------------------------------
+
+def pozeni_skripto(pot):
+    """Požene skripto iz repozitorija. Isto kot v terminalu: python <pot>."""
+    print(f"$ python {pot}")
+    okolje = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    izid = subprocess.run([sys.executable, str(KOREN / pot)], cwd=KOREN, env=okolje,
+                          capture_output=True, text=True, encoding="utf-8")
+    print(izid.stdout, end="")
+    if izid.returncode != 0:
+        raise RuntimeError(f"Skripta {pot} se ni končala pravilno:\n{izid.stderr}")
+
+
+# ---------------------------------------------------------------------------
+# Mere za klasifikacijo — prvič prikazano v: A_klasifikacijsko_drevo (A2)
+# ---------------------------------------------------------------------------
+
+def mere(dejansko, napoved):
+    """Matrika zamenjav in tri mere. 1 = odide (to napoved imenujemo pozitivna), 0 = ostane."""
+    dejansko, napoved = np.asarray(dejansko), np.asarray(napoved)
+    tp = int(((napoved == 1) & (dejansko == 1)).sum())      # TP, true positive: napovemo odhod, stranka odide
+    fp = int(((napoved == 1) & (dejansko == 0)).sum())      # FP, false positive: napovemo odhod, stranka ostane
+    fn = int(((napoved == 0) & (dejansko == 1)).sum())      # FN, false negative: napovemo, da ostane, stranka odide
+    tn = int(((napoved == 0) & (dejansko == 0)).sum())      # TN, true negative: napovemo, da ostane, in ostane
+    return {"TP": tp, "FP": fp, "FN": fn, "TN": tn,
+            "točnost": (tp + tn) / len(dejansko),                           # delež pravilnih napovedi
+            "natančnost": tp / (tp + fp) if tp + fp > 0 else np.nan,       # brez napovedanih odhodov ni določena
+            "priklic": tp / (tp + fn)}                                       # delež najdenih odhodov
+
+
+def graf_matrike(dejansko, napoved, naslov=""):
+    """Matrika zamenjav kot graf. Vrstice: kaj se je zgodilo. Stolpci: kaj smo napovedali."""
+    m = mere(dejansko, napoved)
+    polja = pd.DataFrame({"napoved": ["odide", "ostane", "odide", "ostane"],
+                          "dejansko": ["odide", "odide", "ostane", "ostane"],
+                          "oznaka": ["TP", "FN", "FP", "TN"]})
+    polja["strank"] = [m[o] for o in polja["oznaka"]]
+    polja["izid"] = np.where(polja["napoved"] == polja["dejansko"], "pravilno", "napaka")
+    polja["besedilo"] = [f"{o}\n{s:,}".replace(",", " ") for o, s in zip(polja["oznaka"], polja["strank"])]
+    return (ggplot(polja, aes(x="napoved", y="dejansko", fill="izid"))
+            + geom_tile(color="white", size=2)
+            + geom_text(aes(label="besedilo"), size=13)
+            + scale_fill_manual(values={"pravilno": "#cfe8d9", "napaka": "#f6d5c7"})
+            + scale_x_discrete(limits=["odide", "ostane"])
+            + scale_y_discrete(limits=["ostane", "odide"])            # "odide" je zgoraj
+            + coord_equal()
+            + labs(title=naslov, x="napoved (predicted)", y="dejansko (actual)", fill="")
+            + theme(panel_grid=element_blank(), axis_text=element_text(size=11), figure_size=(4.6, 3.6)))
+
+
+# ---------------------------------------------------------------------------
+# Izris drevesa — prvič prikazano v: A_klasifikacijsko_drevo (A3, A4, A7, A9)
+# ---------------------------------------------------------------------------
+
+def _mesanica(barva, moc):
+    """Barva med belo (moc = 0) in izbrano barvo (moc = 1)."""
+    return tuple(1 - moc * (1 - c) for c in to_rgb(barva))
+
+
+def narisi_drevo(drevo, znacilke, globina=None, ax=None, velikost=(13, 5.5), pisava=9):
+    """Nariše drevo s slovenskimi oznakami. Modro = večina ostane, oranžno = večina odide."""
+    if ax is None:
+        _, ax = plt.subplots(figsize=velikost)
+    polja = plot_tree(drevo, feature_names=list(znacilke), max_depth=globina, impurity=False,
+                      filled=True, rounded=True, fontsize=pisava, ax=ax)
+    for polje in polja:
+        besedilo = polje.get_text()
+        stevila = re.search(r"value = \[([\d.]+), ([\d.]+)\]", besedilo)
+        if stevila is None:                    # "(...)": veje pod prikazano globino
+            continue
+        ostane, odide = float(stevila.group(1)), float(stevila.group(2))
+        delez = odide / (ostane + odide)
+        prva = besedilo.split("\n")[0]
+        vrstice = ([prva] if "<=" in prva else []) + [
+            f"strank: {ostane + odide:,.0f}".replace(",", " "),
+            f"odide: {delez:.0%}",
+            "napoved: " + IMENA_RAZREDOV[int(delez > 0.5)],
+        ]
+        polje.set_text("\n".join(vrstice))
+        okvir = polje.get_bbox_patch()
+        okvir.set_facecolor(_mesanica(ORANZNA if delez > 0.5 else MODRA, 0.15 + 0.85 * abs(delez - 0.5) * 2))
+        okvir.set_edgecolor("#8a8a8a")
+    for oznaka in ax.texts:                    # oznaki na prvih vejah: True / False -> da / ne
+        if oznaka.get_text().strip() in ("True", "False"):
+            oznaka.set_text("da" if oznaka.get_text().strip() == "True" else "ne")
+    return ax
+
+
+def graf_obmocij(drevo, podatki, x, y, koraki=160):
+    """Območja napovedi za drevo, ki je naučeno SAMO na dveh značilkah (x in y)."""
+    meje_x = podatki[x].quantile([0.005, 0.995])
+    meje_y = podatki[y].quantile([0.005, 0.995])
+    mreza = pd.DataFrame([(a, b) for a in np.linspace(*meje_x, koraki) for b in np.linspace(*meje_y, koraki)],
+                         columns=[x, y])
+    mreza["verjetnost"] = drevo.predict_proba(mreza)[:, 1]
+    return (ggplot(mreza, aes(x=x, y=y, fill="verjetnost"))
+            + geom_tile()
+            + scale_fill_gradient2(low=MODRA, mid="#f0efec", high=ORANZNA, midpoint=0.5, limits=(0, 1))
+            + labs(fill="verjetnost\nodhoda")
+            + theme(panel_grid=element_blank()))
+
+
+def oceni_globine(X_ucni, y_ucni, X_val, y_val, globine=range(1, 21)):
+    """Za vsako globino nauči drevo in vrne točnost na učni in validacijski množici."""
+    vrstice = []
+    for globina in globine:
+        drevo = DecisionTreeClassifier(max_depth=globina, random_state=SEME).fit(X_ucni, y_ucni)
+        vrstice.append({"globina": globina, "listov": drevo.get_n_leaves(),
+                        "učna": drevo.score(X_ucni, y_ucni), "validacijska": drevo.score(X_val, y_val)})
+    return pd.DataFrame(vrstice)
+
+
+# ---------------------------------------------------------------------------
+# Lestvica "100 klicev" — prvič prikazano v: A_poslovna_odlocitev (A1–A3)
+# ---------------------------------------------------------------------------
+
+def izberi_najbolj_tvegane(ocene, k=100):
+    """Vrne k strank z najvišjo oceno. Stranke z enako oceno razvrstimo naključno (seme 42)."""
+    premesane = ocene.dropna().sample(frac=1, random_state=SEME)
+    return premesane.sort_values(ascending=False, kind="stable").index[:k]
+
+
+def vrstica_lestvice(ime, ocene, odhod):
+    """Koliko od izbranih 100 oziroma 1 000 strank je res odšlo."""
+    return {"izbira": ime,
+            "odšlo od 100": int(odhod.loc[izberi_najbolj_tvegane(ocene, 100)].sum()),
+            "odšlo od 1 000": int(odhod.loc[izberi_najbolj_tvegane(ocene, 1000)].sum())}
+
+
+def graf_izbranih(izbori):
+    """izbori = {naslov: odhod izbranih 100 strank}. Za vsak izbor mreža 10 x 10: oranžna = odšla."""
+    deli = []
+    for naslov, odhod in izbori.items():
+        urejene = odhod.sort_values(ascending=False).reset_index(drop=True)
+        deli.append(pd.DataFrame({"x": urejene.index % 10, "y": 9 - urejene.index // 10,
+                                  "stranka": urejene.map({1: "odšla", 0: "ostala"}),
+                                  "izbor": f"{naslov}\nodšlo: {int(urejene.sum())} od {len(urejene)}"}))
+    mreza = pd.concat(deli)
+    mreza["izbor"] = pd.Categorical(mreza["izbor"], mreza["izbor"].unique())     # vrstni red kot v slovarju
+    return (ggplot(mreza, aes(x="x", y="y", color="stranka"))
+            + geom_point(size=7.5)
+            + scale_color_manual(values={"odšla": ORANZNA, "ostala": MODRA})
+            + facet_wrap("~izbor")
+            + coord_equal()
+            + labs(color="")
+            + theme_void()
+            + theme(figure_size=(0.9 + 3.9 * len(izbori), 4.5),
+                    strip_text=element_text(size=11, weight="bold", linespacing=1.4)))
+
+
+# ---------------------------------------------------------------------------
+# Polinomska regresija in skupni graf regresijskih modelov — prvič prikazano v: A_regresija (A6)
+# ---------------------------------------------------------------------------
+
+
+def potence(X, stopnja):
+    """Vsakemu stolpcu doda njegove potence: x, x², x³ … do izbrane stopnje."""
+    return pd.DataFrame({f"{c}^{k}": X[c] ** k for c in X.columns for k in range(1, stopnja + 1)})
+
+
+def nauci_polinom(X, y, stopnja):
+    """Nauči polinom izbrane stopnje. Vrne funkcijo napovej: damo ji tabelo, vrne napovedi."""
+    skala = StandardScaler().fit(potence(X, stopnja))                          # povprečje in odklon: samo iz podanih (učnih) podatkov
+    model = LinearRegression().fit(skala.transform(potence(X, stopnja)), y)    # linearna regresija na vseh potencah
+
+    def napovej(X_novi):
+        return model.predict(skala.transform(potence(X_novi, stopnja)))        # isti koraki na novih podatkih
+    return napovej
+
+
+def graf_napovedi(modeli, podatki, x="obljubljeni_dnevi", y="dni_dostave", povprecja=True):
+    """Napovedi več modelov na istem grafu. Vsak model uporablja eno značilko x.
+
+    modeli = {ime: model}. Model je naučen model s funkcijo predict (premica, drevo)
+    ali funkcija, ki za tabelo s stolpcem x vrne napovedi (tako funkcijo vrne nauci_polinom).
+    Pike: povprečje y v 40 pasovih x (povprecja=True) ali vsaka vrstica posebej (False).
+    """
+    spodaj, zgoraj = podatki[x].quantile([0.01, 0.99]) if povprecja else (podatki[x].min(), podatki[x].max())
+    znotraj = podatki[(podatki[x] >= spodaj) & (podatki[x] <= zgoraj)]
+    pike = znotraj.groupby(pd.cut(znotraj[x], 40), observed=True)[[x, y]].mean() if povprecja else znotraj[[x, y]]
+    mreza = pd.DataFrame({x: np.linspace(spodaj, zgoraj, 300)})
+    crte = []
+    for ime, model in modeli.items():
+        napovej = model.predict if hasattr(model, "predict") else model      # naučen model ali funkcija
+        crte.append(mreza.assign(napoved=napovej(mreza), model=ime))
+    crte = pd.concat(crte)
+    crte["model"] = pd.Categorical(crte["model"], list(modeli))
+    barve = [MODRA, ORANZNA, ZELENA, "#8e44ad", "#555555"][:len(modeli)]
+    return (ggplot()
+            + geom_point(aes(x=x, y=y), data=pike, color=SIVA, size=2, alpha=0.8)
+            + geom_line(aes(x=x, y="napoved", color="model"), data=crte, size=1.3)
+            + scale_color_manual(values=barve)
+            + labs(color="", subtitle="sive pike: " + ("povprečje v 40 pasovih x" if povprecja else "posamezne vrstice")))
 
 
 if __name__ == "__main__":

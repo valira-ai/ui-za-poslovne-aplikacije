@@ -103,12 +103,14 @@ Nato odprite zvezek za vajo (glej spodaj) in celice zaganjajte po vrsti, od zgor
 | --- | --- |
 | Uvod v podatkovno znanost | [Uvod v podatkovno znanost (PDF)](01_Uvod_v_podatkovno_znanost/Uvod%20v%20podatkovno%20znanost.pdf) |
 | Eksplorativna analiza podatkov | [Eksplorativna analiza podatkov (PDF)](02_Eksplorativna_analiza_podatkov/Eksplorativna%20analiza%20podatkov.pdf) |
+| Uvod v strojno učenje | [Uvod v strojno učenje (PDF)](03_Uvod_v_strojno_ucenje/Uvod%20v%20strojno%20u%C4%8Denje.pdf) |
+| Nadzorovano učenje v praksi | [Nadzorovano učenje v praksi (PDF)](04_Nadzorovano_ucenje_v_praksi/Nadzorovano%20u%C4%8Denje%20v%20praksi.pdf) |
 
 ---
 
 ## Zvezki in vaje
 
-Vsak sklop ima dva zvezka:
+Sklopi prvega modula imajo prikaz in vajo:
 
 - **Zvezki z začetnico `A` — prikaz.** Poganja jih predavatelj, vi spremljate razlago in rezultate.
 - **Zvezki z začetnico `B` — vaja.** Koda je pripravljena; sami jo izvajate, izbirate predlagane stolpce in odgovarjate na vprašanja.
@@ -131,6 +133,25 @@ Na začetku zvezka so navodila, nastavitev okolja in nalaganje podatkov. Nato na
 | Normalizacija in standardizacija | [A](02_Eksplorativna_analiza_podatkov/notebooks/03_normalizacija_in_standardizacija/A-Normalizacija-in-standardizacija.ipynb) | [B](02_Eksplorativna_analiza_podatkov/notebooks/03_normalizacija_in_standardizacija/B-Normalizacija-in-standardizacija.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/02_Eksplorativna_analiza_podatkov/notebooks/03_normalizacija_in_standardizacija/A-Normalizacija-in-standardizacija.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/02_Eksplorativna_analiza_podatkov/notebooks/03_normalizacija_in_standardizacija/B-Normalizacija-in-standardizacija.ipynb) |
 | Oblikovanje značilk | [A](02_Eksplorativna_analiza_podatkov/notebooks/04_oblikovanje_znacilk/A-Oblikovanje-znacilk.ipynb) | [B](02_Eksplorativna_analiza_podatkov/notebooks/04_oblikovanje_znacilk/B-Oblikovanje-znacilk.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/02_Eksplorativna_analiza_podatkov/notebooks/04_oblikovanje_znacilk/A-Oblikovanje-znacilk.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/02_Eksplorativna_analiza_podatkov/notebooks/04_oblikovanje_znacilk/B-Oblikovanje-znacilk.ipynb) |
 
+### Modul 2 — vrstni red zvezkov
+
+Zvezke izvajamo v spodnjem vrstnem redu. Poslovna odločitev je pred logistično regresijo;
+**sklop 03 zaključimo z logistično regresijo, sklop 04 začnemo z naključnimi gozdovi**.
+Zvezki `A` so prikazi, `B` vaje; zvezki `A1` in `A2` vsebujejo tudi naloge za samostojne poskuse.
+
+| Sklop | Vsebina | Zvezki | Google Colab |
+| --- | --- | --- | --- |
+| 03 | Priprava podatkov | [A1 — Telekom](03_Uvod_v_strojno_ucenje/notebooks/01_priprava_podatkov/A1_Priprava_Telekom.ipynb) · [A2 — Olist](03_Uvod_v_strojno_ucenje/notebooks/01_priprava_podatkov/A2_Priprava_Olist.ipynb) | [A1 — Telekom](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/01_priprava_podatkov/A1_Priprava_Telekom.ipynb) · [A2 — Olist](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/01_priprava_podatkov/A2_Priprava_Olist.ipynb) |
+| 03 | Preverjanje modela in delitev | [A1 — Telekom](03_Uvod_v_strojno_ucenje/notebooks/02_preverjanje_modela/A1_Delitev_in_manjkajoce_Telekom.ipynb) · [A2 — Olist](03_Uvod_v_strojno_ucenje/notebooks/02_preverjanje_modela/A2_Delitev_in_manjkajoce_Olist.ipynb) | [A1 — Telekom](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/02_preverjanje_modela/A1_Delitev_in_manjkajoce_Telekom.ipynb) · [A2 — Olist](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/02_preverjanje_modela/A2_Delitev_in_manjkajoce_Olist.ipynb) |
+| 03 | Klasifikacijsko drevo, pipeline in metrike | [A](03_Uvod_v_strojno_ucenje/notebooks/03_klasifikacijsko_drevo/A_klasifikacijsko_drevo.ipynb) · [B](03_Uvod_v_strojno_ucenje/notebooks/03_klasifikacijsko_drevo/B_klasifikacijsko_drevo.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/03_klasifikacijsko_drevo/A_klasifikacijsko_drevo.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/03_klasifikacijsko_drevo/B_klasifikacijsko_drevo.ipynb) |
+| 03 | Poslovna odločitev | [A](03_Uvod_v_strojno_ucenje/notebooks/04_poslovna_odlocitev/A_poslovna_odlocitev.ipynb) · [B](03_Uvod_v_strojno_ucenje/notebooks/04_poslovna_odlocitev/B_poslovna_odlocitev.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/04_poslovna_odlocitev/A_poslovna_odlocitev.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/04_poslovna_odlocitev/B_poslovna_odlocitev.ipynb) |
+| 03 | Logistična regresija | [A1 — Telekom](03_Uvod_v_strojno_ucenje/notebooks/05_logisticna_regresija/A1_Logisticna_regresija_Telekom.ipynb) | [A1 — Telekom](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/03_Uvod_v_strojno_ucenje/notebooks/05_logisticna_regresija/A1_Logisticna_regresija_Telekom.ipynb) |
+| 04 | Naključni gozdovi | [A](04_Nadzorovano_ucenje_v_praksi/notebooks/01_nakljucni_gozdovi/A_nakljucni_gozdovi.ipynb) · [B](04_Nadzorovano_ucenje_v_praksi/notebooks/01_nakljucni_gozdovi/B_nakljucni_gozdovi.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/01_nakljucni_gozdovi/A_nakljucni_gozdovi.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/01_nakljucni_gozdovi/B_nakljucni_gozdovi.ipynb) |
+| 04 | Gradientno pospešena drevesa | [A1 — Telekom](04_Nadzorovano_ucenje_v_praksi/notebooks/02_gradientno_pospesena_drevesa/A1_Gradientno_pospesena_drevesa_Telekom.ipynb) | [A1 — Telekom](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/02_gradientno_pospesena_drevesa/A1_Gradientno_pospesena_drevesa_Telekom.ipynb) |
+| 04 | Linearna in polinomska regresija | [A](04_Nadzorovano_ucenje_v_praksi/notebooks/03_regresija/A_regresija.ipynb) · [B](04_Nadzorovano_ucenje_v_praksi/notebooks/03_regresija/B_regresija.ipynb) | [A](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/03_regresija/A_regresija.ipynb) · [B](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/03_regresija/B_regresija.ipynb) |
+| 04 | Regresijska drevesa in ansambli | [A1 — Olist](04_Nadzorovano_ucenje_v_praksi/notebooks/04_regresijska_drevesa/A1_Regresijska_drevesa_in_ansambli_Olist.ipynb) | [A1 — Olist](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/04_regresijska_drevesa/A1_Regresijska_drevesa_in_ansambli_Olist.ipynb) |
+| 04 | Zaključna primerjava: Telekom in Olist | [A1 — Telekom](04_Nadzorovano_ucenje_v_praksi/notebooks/05_koncna_primerjava/A1_Koncna_primerjava_Telekom.ipynb) · [A2 — Olist](04_Nadzorovano_ucenje_v_praksi/notebooks/05_koncna_primerjava/A2_Koncna_primerjava_Olist.ipynb) | [A1 — Telekom](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/05_koncna_primerjava/A1_Koncna_primerjava_Telekom.ipynb) · [A2 — Olist](https://colab.research.google.com/github/valira-ai/ui-za-poslovne-aplikacije/blob/main/04_Nadzorovano_ucenje_v_praksi/notebooks/05_koncna_primerjava/A2_Koncna_primerjava_Olist.ipynb) |
+
 ### Kaj je v repozitoriju
 
 ```
@@ -139,7 +160,10 @@ ui-za-poslovne-aplikacije/
 ├── requirements.txt                          seznam knjižnic za namestitev
 ├── utils/
 │   ├── __init__.py
-│   └── orodja.py                             prenos podatkov in funkcije, ki jih zvezki uporabljajo večkrat
+│   ├── modeliranje.py                        skupna priprava in branje podatkov za modeliranje
+│   ├── orodja.py                             prenos podatkov in pomožne funkcije
+│   ├── pripravi_telekom.py                    priprava in delitev Telekoma
+│   └── pripravi_olist.py                      priprava in delitev Olista
 ├── data/                                     podatki (nastanejo ob prvem zagonu)
 ├── 01_Uvod_v_podatkovno_znanost/
 │   ├── notebooks/
@@ -154,8 +178,22 @@ ui-za-poslovne-aplikacije/
 │   │   ├── 03_normalizacija_in_standardizacija/
 │   │   └── 04_oblikovanje_znacilk/
 │   └── Eksplorativna analiza podatkov.pdf     predstavitev
-├── 03_Uvod_v_strojno_ucenje/                 trenutno prazno
+├── 03_Uvod_v_strojno_ucenje/
+│   ├── Uvod v strojno učenje.pdf              predstavitev
+│   └── notebooks/
+│       ├── 01_priprava_podatkov/
+│       ├── 02_preverjanje_modela/
+│       ├── 03_klasifikacijsko_drevo/
+│       ├── 04_poslovna_odlocitev/
+│       └── 05_logisticna_regresija/
 ├── 04_Nadzorovano_ucenje_v_praksi/
+│   ├── Nadzorovano učenje v praksi.pdf        predstavitev
+│   └── notebooks/
+│       ├── 01_nakljucni_gozdovi/
+│       ├── 02_gradientno_pospesena_drevesa/
+│       ├── 03_regresija/
+│       ├── 04_regresijska_drevesa/
+│       └── 05_koncna_primerjava/
 └── 05_Nenadzorovano_ucenje_v_praksi/
 ```
 
